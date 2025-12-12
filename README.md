@@ -193,6 +193,33 @@ Server Side:
 [Server:8443] → [Proxy:1080] (opens after client connects)
 ```
 
+### Data Flow Diagram
+
+```
+┌────────────────────────────┐        ┌────────────────────────────┐
+│   Customer Internal VCS    │        │    ZeroPath SaaS Platform  │
+└──────────────┬─────────────┘        └──────────────┬─────────────┘
+               │                                      │
+               │ (1) HTTPS/Webhooks                   │
+               ▼                                      │
+        ┌───────────────┐                             │
+        │ Broker Client │                             │
+        │ (self-hosted) │                             │
+        └──────┬────────┘                             │
+               │ (2) Enforced egress (iptables/netpol)│
+               ▼                                      │
+        ┌───────────────┐   Mutual auth TLS   ┌───────────────┐
+        │ Reverse Tunnel│ ==================> │ Broker Server │
+        │ (outbound)    │ <================== │ (self-hosted) │
+        └───────────────┘   (3) Control/Data  └──────┬────────┘
+                                                     │
+                                                     │ (4) SOCKS / port forwards
+                                                     ▼
+                                            ┌────────────────────┐
+                                            │ ZeroPath Scanners  │
+                                            └────────────────────┘
+```
+
 ## Port 1080 Behavior
 
 **Port 1080 only opens AFTER a client connects!**
