@@ -1,0 +1,34 @@
+FROM alpine:latest
+
+# Install dependencies including openssl for cert generation
+RUN apk add --no-cache ca-certificates wget openssl
+
+# Install chisel
+RUN wget -q https://github.com/jpillora/chisel/releases/download/v1.11.3/chisel_1.11.3_linux_amd64.gz && \
+    gunzip chisel_1.11.3_linux_amd64.gz && \
+    mv chisel_1.11.3_linux_amd64 /usr/local/bin/chisel && \
+    chmod +x /usr/local/bin/chisel
+
+# Create user
+RUN addgroup -g 1000 broker && \
+    adduser -D -u 1000 -G broker broker
+
+# Copy entrypoint
+COPY server-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Create certs directory with correct permissions
+RUN mkdir -p /tmp/certs && chown broker:broker /tmp/certs
+
+# Expose ports
+EXPOSE 8443 1080
+
+# Switch to non-root user
+USER broker
+
+LABEL description="ZeroPath Broker Server - Secure reverse proxy with TLS"
+LABEL version="1.0"
+LABEL vendor="ZeroPath Corp."
+LABEL website="zeropath.com"
+
+ENTRYPOINT ["/entrypoint.sh"]
