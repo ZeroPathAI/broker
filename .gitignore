@@ -1,0 +1,6 @@
+# Compiled daemon binary (produced by `go build` / the Dockerfile build stage).
+/broker
+
+# Go test/coverage artifacts.
+*.test
+*.out
